@@ -1,14 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 
-headers = {
-    "User-Agent":
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"
-}
-
 
 def get_last_page(URL):
-    result = requests.get(URL, headers=headers)
+    result = requests.get(URL)
     soup = BeautifulSoup(result.text, "html.parser")
     pagination = soup.find("div", {"class": "s-pagination"})
     if pagination:
@@ -44,7 +39,7 @@ def extract_jobs(last_page, URL):
     job_list = []
     for page in range(last_page):
         print("Scrapping StackOverflow page " + str(page + 1))
-        result = requests.get(f"{URL}&pg={page + 1})", headers=headers)
+        result = requests.get(f"{URL}&pg={page + 1})")
         soup = BeautifulSoup(result.text, "html.parser")
         jobs = soup.find_all("div", {"data-jobid": True})
         for job in jobs:

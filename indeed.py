@@ -3,14 +3,9 @@ from bs4 import BeautifulSoup
 
 LIMIT = 50
 
-headers = {
-    "User-Agent":
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"
-}
-
 
 def get_last_page(URL, start=0):
-    result = requests.get(f"{URL}&start={start * 50}", headers=headers)
+    result = requests.get(f"{URL}&start={start * 50}")
     soup = BeautifulSoup(result.text, 'html.parser')
 
     pagination = soup.find("div", {"class": "pagination"})
@@ -57,8 +52,7 @@ def extract_jobs(last_page, URL):
     job_list = []
     for page in range(last_page):
         print("Scrapping indeed page " + str(page + 1))
-        result = requests.get(f"{URL}&start={page * 50}",
-                              headers=headers)
+        result = requests.get(f"{URL}&start={page * 50}")
         result_soup = BeautifulSoup(result.text, "html.parser")
         job_cards = result_soup.find_all("a", {"data-jk": True})
         for job in job_cards:
