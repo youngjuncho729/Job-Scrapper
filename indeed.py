@@ -1,17 +1,16 @@
 import requests
 from bs4 import BeautifulSoup
 
-JOB = "python"
 LIMIT = 50
-INDEED_URL = f"https://www.indeed.com/jobs?q={JOB}&limit={LIMIT}"
+
 headers = {
     "User-Agent":
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"
 }
 
 
-def get_last_page(start=0):
-    result = requests.get(f"{INDEED_URL}&start={start * 50}", headers=headers)
+def get_last_page(URL, start=0):
+    result = requests.get(f"{URL}&start={start * 50}", headers=headers)
     soup = BeautifulSoup(result.text, 'html.parser')
 
     pagination = soup.find("div", {"class": "pagination"})
@@ -21,7 +20,7 @@ def get_last_page(start=0):
     next_page = pagination.find("a", {"aria-label": "Next"})
     if next_page:
         new_start = int(pages[-2].string)
-        return get_last_page(new_start)
+        return get_last_page(URL, new_start)
 
     else:
         return int(pages[-1].string)
@@ -54,11 +53,11 @@ def extract_job_info(html):
     return job_info
 
 
-def extract_jobs(last_page):
+def extract_jobs(last_page, URL):
     job_list = []
     for page in range(last_page):
         print("Scrapping indeed page " + str(page + 1))
-        result = requests.get(f"{INDEED_URL}&start={page * 50}",
+        result = requests.get(f"{URL}&start={page * 50}",
                               headers=headers)
         result_soup = BeautifulSoup(result.text, "html.parser")
         job_cards = result_soup.find_all("a", {"data-jk": True})
@@ -68,9 +67,10 @@ def extract_jobs(last_page):
     return job_list
 
 
-def get_indeed():
+def get_indeed(JOB):
+    URL = f"https://www.indeed.com/jobs?q={JOB}&limit={LIMIT}"
     print("Finding the number of pages...")
-    last_page = get_last_page()
-    indeed_jobs = extract_jobs(last_page)
+    last_page = get_last_page(URL)
+    indeed_jobs = extract_jobs(last_page, URL)
     print("Finished scrapping jobs on indeed")
     return indeed_jobs
