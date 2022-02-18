@@ -6,7 +6,7 @@ LIMIT = 50
 
 def get_last_page(URL, start=0):
     result = requests.get(f"{URL}&start={start * 50}")
-    soup = BeautifulSoup(result.text, 'html.parser')
+    soup = BeautifulSoup(result.text, "html.parser")
 
     pagination = soup.find("div", {"class": "pagination"})
 
@@ -27,22 +27,22 @@ def extract_job_info(html):
 
     result_content = html.find("td", {"class": "resultContent"})
     # extract the job title
-    job_title = result_content.find("h2", {
-        "class": "jobTitle"
-    }).find("span", title=True).string
+    job_title = (
+        result_content.find("h2", {"class": "jobTitle"}).find("span", title=True).string
+    )
     # extract the company hiring
     job_company = html.find("span", {"class": "companyName"}).string
     # extract the job location
     location = html.find("div", {"class": "companyLocation"})
     job_location = ""
     for n in location.stripped_strings:
-        job_location += (" " + str(n))
+        job_location += " " + str(n)
 
     job_info = {
         "title": job_title,
         "company": job_company,
         "location": job_location,
-        "link": f"https://www.indeed.com/viewjob?jk={job_id}"
+        "link": f"https://www.indeed.com/viewjob?jk={job_id}",
     }
 
     return job_info

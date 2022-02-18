@@ -13,7 +13,8 @@ def search_jobs(job):
     jobs = indeed_jobs + stackoverflow_jobs
     return jobs
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Save results into csv file
     jobs = search_jobs("python")
     save_to_csv(jobs)

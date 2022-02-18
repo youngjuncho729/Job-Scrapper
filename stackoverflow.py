@@ -22,15 +22,15 @@ def extract_job_info(html):
     job_id = html["data-jobid"]
     job_title = content.find("h2").find("a").string
     job_company = content.find("h3").find("span").get_text(strip=True)
-    job_location = content.find("h3").find("span", {
-        "class": "fc-black-500"
-    }).get_text(strip=True)
+    job_location = (
+        content.find("h3").find("span", {"class": "fc-black-500"}).get_text(strip=True)
+    )
 
     job_info = {
         "title": job_title,
         "company": job_company,
         "location": job_location,
-        "link": f"https://stackoverflow.com/jobs/{job_id}"
+        "link": f"https://stackoverflow.com/jobs/{job_id}",
     }
     return job_info
 
