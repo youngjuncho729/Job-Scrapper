@@ -18,22 +18,22 @@ def root():
 @app.route("/search")
 def search():
     word = request.args.get("word")
-    country = request.args.get("country")
+    location = request.args.get("country")
+    location = location.lower() if location else ""
     if word:
         word = word.lower()
-        # country = country.lower()
-        fromdb = db.get(word)
+        fromdb = db.get((word, location))
         if fromdb:
             jobs = fromdb
         else:
-            jobs = search_jobs(word)
-            db[word] = jobs
+            jobs = search_jobs(word, location)
+            db[(word, location)] = jobs
     else:
         return redirect("/")
     return render_template(
         "search.html",
         searchFor=word,
-        workWhere=country,
+        workWhere=location,
         resultsNum=len(jobs),
         jobs=jobs,
     )
@@ -43,10 +43,12 @@ def search():
 def export():
     try:
         word = request.args.get("word")
+        location = request.args.get("location")
         if not word:
             raise Exception()
         word = word.lower()
-        jobs = db.get(word)
+        location = location.lower() if location else ""
+        jobs = db.get((word, location))
         if not jobs:
             raise Exception()
         save_to_csv(jobs)

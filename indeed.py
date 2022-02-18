@@ -1,3 +1,4 @@
+from ctypes.wintypes import PINT
 import requests
 from bs4 import BeautifulSoup
 
@@ -5,11 +6,19 @@ LIMIT = 50
 
 
 def get_last_page(URL, start=0):
-    result = requests.get(f"{URL}&start={start * 50}")
+    result = requests.get(f"{URL}&start={start * LIMIT}")
     soup = BeautifulSoup(result.text, "html.parser")
 
-    pagination = soup.find("div", {"class": "pagination"})
+    # When there is no result
+    country = soup.find("p", {"class": "oocs"})
+    if country:
+        country_link = country.find("a")["href"]
+        return -1
 
+    pagination = soup.find("div", {"class": "pagination"})
+    # when there is only one page result
+    if not pagination:
+        return 1
     pages = pagination.find_all("a")
 
     next_page = pagination.find("a", {"aria-label": "Next"})
@@ -50,6 +59,8 @@ def extract_job_info(html):
 
 def extract_jobs(last_page, URL):
     job_list = []
+    if last_page == -1:
+        return job_list
     for page in range(last_page):
         print("Scrapping indeed page " + str(page + 1))
         result = requests.get(f"{URL}&start={page * 50}")
@@ -61,8 +72,8 @@ def extract_jobs(last_page, URL):
     return job_list
 
 
-def get_indeed(JOB):
-    URL = f"https://www.indeed.com/jobs?q={JOB}&limit={LIMIT}"
+def get_indeed(job, location):
+    URL = f"https://www.indeed.com/jobs?q={job}&l={location}&limit={LIMIT}"
     print("Finding the number of pages...")
     last_page = get_last_page(URL)
     indeed_jobs = extract_jobs(last_page, URL)

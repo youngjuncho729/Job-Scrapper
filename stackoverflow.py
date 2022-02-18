@@ -14,7 +14,7 @@ def get_last_page(URL):
         else:
             return int(last_span)
     else:
-        return 0
+        return 1
 
 
 def extract_job_info(html):
@@ -41,6 +41,12 @@ def extract_jobs(last_page, URL):
         print("Scrapping StackOverflow page " + str(page + 1))
         result = requests.get(f"{URL}&pg={page + 1})")
         soup = BeautifulSoup(result.text, "html.parser")
+        total_jobs = soup.find(
+            "span", {"class": "description fc-light fs-body1"}
+        ).get_text(strip=True)
+        # Return empty list when there is 0 result
+        if total_jobs == "0 jobs":
+            return []
         jobs = soup.find_all("div", {"data-jobid": True})
         for job in jobs:
             job = extract_job_info(job)
@@ -48,8 +54,8 @@ def extract_jobs(last_page, URL):
     return job_list
 
 
-def get_stackoverflow(JOB):
-    URL = f"https://stackoverflow.com/jobs?q={JOB}"
+def get_stackoverflow(job, location):
+    URL = f"https://stackoverflow.com/jobs?q={job}&l={location}"
     print("Finding the number of pages...")
     last_page = get_last_page(URL)
     SOF_jobs = extract_jobs(last_page, URL)
