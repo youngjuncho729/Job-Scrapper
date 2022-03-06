@@ -1,32 +1,43 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Job Search</title>
-    <style>
-      section {
-        display: grid;
-        gap: 20px;
-        grid-template-columns: repeat(4, 1fr);
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Job Search</h1>
-    <h3>We have found {{resultsNum}} results for {{searchFor}}</h3>
-    <a href="/export?word={{searchFor}}&location={{workWhere}}"
-      >Export to csv</a
-    >
-    <section>
-      <h4>Title</h4>
-      <h4>Company</h4>
-      <h4>Location</h4>
-      <h4>Link</h4>
-      {% for job in jobs %}
-      <span>{{job.title}}</span>
-      <span>{{job.company}}</span>
-      <span>{{job.location}}</span>
-      <a href="{{job.link}}" target="_blank">Apply</a>
-      {% endfor %}
-    </section>
-  </body>
+
+<head>
+  <title>Job Search</title>
+  <style>
+    section {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(4, 1fr);
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Job Search</h1>
+  <h3>We have found {{resultsNum}} results for {{searchFor}}</h3>
+
+  <a href="/export?word={{searchFor}}&location={{workWhere}}">Export to csv</a>
+  <section>
+    <h4>Title</h4>
+    <h4>Company</h4>
+    <h4>Location</h4>
+    <h4>Link</h4>
+
+    {% for i in range((page - 1) * items_per_page, [page * items_per_page, resultsNum] | min) %}
+    <span>{{jobs[i].title}}</span>
+    <span>{{jobs[i].company}}</span>
+    <span>{{jobs[i].location}}</span>
+    <a href="{{jobs[i].link}}" target="_blank">Apply</a>
+    {% endfor %}
+  </section>
+  <h3>Viewing page {{page}} of {{pages}}</h3>
+  {% if page != 1 %}
+  <a href="/search?word={{searchFor}}&location={{workWhere}}&page={{page - 1}}">previous</a>
+  {% endif %}
+  {% if page != pages %}
+  <a href="/search?word={{searchFor}}&location={{workWhere}}&page={{page + 1}}">next</a>
+  {% endif %}
+
+</body>
+
 </html>
