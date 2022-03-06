@@ -19,6 +19,7 @@ def root():
 def search():
     word = request.args.get("word")
     location = request.args.get("country")
+
     location = location.lower() if location else ""
     if word:
         word = word.lower()
@@ -30,12 +31,27 @@ def search():
             db[(word, location)] = jobs
     else:
         return redirect("/")
+
+    items_per_page = 50
+
+    pages = (len(jobs) - 1) // items_per_page + 1 if len(jobs) > 0 else 1
+
+    page = request.args.get("page")
+    if not page:
+        page = 1
+    else:
+        page = int(page)
+        page = max(1, min(page, pages))
+
     return render_template(
         "search.html",
         searchFor=word,
         workWhere=location,
         resultsNum=len(jobs),
         jobs=jobs,
+        page=page,
+        pages=pages,
+        items_per_page=items_per_page
     )
 
 
