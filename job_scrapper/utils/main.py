@@ -1,7 +1,6 @@
-import re
-from indeed import get_indeed
-from stackoverflow import get_stackoverflow
-from export import save_to_csv
+from .indeed import get_indeed
+from .stackoverflow import get_stackoverflow
+from .tocsv import save_to_csv
 
 
 def search_jobs(job, location):
@@ -17,5 +16,5 @@ def search_jobs(job, location):
 
 if __name__ == "__main__":
     # Save results into csv file
-    jobs = search_jobs("python", "korea")
+    jobs = search_jobs("python", "california")
     save_to_csv(jobs)
