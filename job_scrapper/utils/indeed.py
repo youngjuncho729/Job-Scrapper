@@ -36,25 +36,30 @@ def extract_job_info(html):
 
     result_content = html.find("td", {"class": "resultContent"})
     # extract the job title
-    job_title = (
-        result_content.find("h2", {"class": "jobTitle"}).find("span", title=True).string
-    )
-    # extract the company hiring
-    job_company = html.find("span", {"class": "companyName"}).string
-    # extract the job location
-    location = html.find("div", {"class": "companyLocation"})
-    job_location = ""
-    for n in location.stripped_strings:
-        job_location += " " + str(n)
+    if result_content:
+        job_title = (
+            result_content.find("h2", {"class": "jobTitle"})
+            .find("span", title=True)
+            .string
+        )
+        # extract the company hiring
+        job_company = html.find("span", {"class": "companyName"}).string
+        # extract the job location
+        location = html.find("div", {"class": "companyLocation"})
+        job_location = ""
+        for n in location.stripped_strings:
+            job_location += " " + str(n)
 
-    job_info = {
-        "title": job_title,
-        "company": job_company,
-        "location": job_location,
-        "link": f"https://www.indeed.com/viewjob?jk={job_id}",
-    }
+        job_info = {
+            "title": job_title,
+            "company": job_company,
+            "location": job_location,
+            "link": f"https://www.indeed.com/viewjob?jk={job_id}",
+        }
 
-    return job_info
+        return job_info
+    else:
+        return None
 
 
 def extract_jobs(last_page, URL):
@@ -68,6 +73,8 @@ def extract_jobs(last_page, URL):
         job_cards = result_soup.find_all("a", {"data-jk": True})
         for job in job_cards:
             job = extract_job_info(job)
+            if job == None:
+                continue
             job_list.append(job)
     return job_list
 
