@@ -1,7 +1,8 @@
+import datetime
 import json
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from search.models import jobList
+from search.models import JobList
 from utils import main, tocsv
 
 
@@ -13,26 +14,30 @@ def search(request):
     word = request.GET.get("word", None)
     location = request.GET.get("location", None)
 
-    location = location.lower() if location else ""
-    print(word, location)
+    location = location.strip().lower() if location else ""
     if word:
-        word = word.lower()
+        word = word.strip().lower()
         try:
-            jobs = jobList.objects.get(word=word, location=location)
-        except jobList.DoesNotExist:
-            jobs_list = main.search_jobs(word, location)
-            jobs_list = json.dumps(jobs_list)
-            jobs = jobList(word=word, location=location, list=jobs_list)
-            jobs.save()
-
+            jobList = JobList.objects.get(word=word, location=location)
+            if jobList.date != datetime.date.today():
+                jobList.date = datetime.date.today()
+                search_result = main.search_jobs(word, location)
+                search_result = json.dumps(search_result)
+                jobList.list = search_result
+                jobList.save()
+        except JobList.DoesNotExist:
+            search_result = main.search_jobs(word, location)
+            search_result = json.dumps(search_result)
+            jobList = JobList(word=word, location=location, list=search_result)
+            jobList.save()
     else:
         return redirect("/")
 
     jsonDec = json.decoder.JSONDecoder()
-    jobs_List = jsonDec.decode(jobs.list)
+    search_result = jsonDec.decode(jobList.list)
 
     items_per_page = 50
-    total_jobs = len(jobs_List)
+    total_jobs = len(search_result)
 
     pages = (total_jobs - 1) // items_per_page + 1 if total_jobs > 0 else 1
 
@@ -43,7 +48,7 @@ def search(request):
         page = int(page)
         page = max(1, min(page, pages))
 
-    jobs_per_page = jobs_List[
+    jobs_per_page = search_result[
         (page - 1) * items_per_page : min(page * items_per_page, total_jobs)
     ]
 
@@ -72,14 +77,14 @@ def export(request):
     word = word.lower()
     location = location.lower() if location else ""
     try:
-        jobs = jobList.objects.get(word=word, location=location)
-    except jobList.DoesNotExist:
+        jobList = JobList.objects.get(word=word, location=location)
+    except JobList.DoesNotExist:
         raise Exception()
 
     jsonDec = json.decoder.JSONDecoder()
-    jobs_List = jsonDec.decode(jobs.list)
+    search_result = jsonDec.decode(jobList.list)
 
-    tocsv.save_to_csv(jobs_List)
+    tocsv.save_to_csv(search_result)
 
     filepath = "./jobs.csv"
     with open(filepath, "rb") as f:
