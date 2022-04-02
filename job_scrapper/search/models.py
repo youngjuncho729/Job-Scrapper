@@ -1,7 +1,4 @@
-from statistics import mode
 from django.db import models
-
-# Create your models here.
 class JobList(models.Model):
     word = models.CharField(max_length=100)
     location = models.CharField(max_length=100, null=True, blank=True)
